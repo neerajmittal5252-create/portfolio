@@ -1,0 +1,661 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Neeraj Kumar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one bordered terminal window fills the screen. Output scrolls, quick-command chips sit under it, and a regular GUI view swaps in on request. Single dark look by choice. */
+:root {
+  --bg: #0d100c;
+  --term: #11150f;
+  --fg: #d9decf;
+  --dim: #7f8977;
+  --rule: #263122;
+  --green: #6fd08c;
+  --amber: #e8b95a;
+  --cyan: #79c3d3;
+  --red: #e27d6a;
+  --edge: #2f9e57;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  box-sizing: border-box;
+  padding-inline: 16px;
+  padding-block: 12px;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+a { color: var(--cyan); }
+
+.win {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--term);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--dim);
+}
+.bar b { font-weight: 500; color: var(--fg); }
+.btn {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 3px 9px;
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn:hover { border-color: var(--cyan); }
+
+.scroller {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 14px 12px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.line { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.gap { height: 0.8em; }
+.ind { padding-left: 4ch; }
+.b { padding-left: 2ch; text-indent: -2ch; }
+.grid2 { display: grid; grid-template-columns: 14ch minmax(0, 1fr); column-gap: 2ch; white-space: normal; }
+.dim { color: var(--dim); }
+.g { color: var(--green); }
+.amber { color: var(--amber); }
+.err { color: var(--red); }
+.u { color: var(--amber); font-weight: 600; }
+.at { color: var(--green); }
+.host { color: var(--green); font-weight: 600; }
+.cmd { color: var(--cyan); cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.cmd:hover { text-decoration-color: currentColor; }
+
+.art {
+  margin: 4px 0 2px;
+  font-family: var(--mono);
+  font-size: clamp(11px, 3.6vw, 22px);
+  line-height: 1;
+  color: var(--green);
+  white-space: pre;
+  overflow-x: auto;
+}
+.art .sh { color: var(--dim); }
+
+.row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 1ch; padding-block: 2px; }
+.row:focus-within { box-shadow: inset 2px 0 0 var(--amber); padding-left: 8px; margin-left: -8px; }
+.prompt { white-space: nowrap; }
+#cmd {
+  flex: 1;
+  min-width: 10ch;
+  background: none;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  color: var(--fg);
+  font: inherit;
+  caret-color: var(--amber);
+}
+@media (pointer: coarse) { #cmd { font-size: 16px; } }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 9px 14px;
+  border-top: 1px dashed var(--rule);
+}
+.chip {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--cyan);
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--cyan); }
+
+/* GUI view */
+.gui { flex: 1; min-height: 0; overflow-y: auto; font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.gwrap {
+  max-width: 860px;
+  margin-inline: auto;
+  padding: 28px clamp(16px, 4vw, 32px) 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+}
+.ghead { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.gwrap h1 { font-family: var(--mono); font-size: clamp(26px, 5vw, 36px); line-height: 1.15; margin: 0; font-weight: 600; color: var(--green); text-wrap: balance; }
+.gwrap .role { margin: 0; color: var(--dim); font-family: var(--mono); font-size: 13px; }
+.gwrap .lead { margin: 4px 0 0; max-width: 62ch; }
+.glinks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-family: var(--mono); font-size: 13px; margin-top: 6px; }
+.gwrap section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.gwrap h2 {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+  font: 600 12px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.proj { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.proj .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 16px; }
+.proj h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.proj .date { font: 12px var(--mono); color: var(--dim); }
+.proj .sub { margin: 0; color: var(--dim); }
+.proj ul { margin: 4px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.tags span { font: 12px var(--mono); border: 1px solid var(--rule); border-radius: 3px; padding: 2px 7px; color: var(--dim); }
+.skills { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: 10px 20px; margin: 0; }
+.skills dt { font: 500 13px/1.7 var(--mono); color: var(--green); }
+.skills dd { margin: 0; }
+.edu { display: flex; flex-direction: column; gap: 2px; }
+.edu .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 16px; }
+.edu .top b { font-weight: 600; }
+.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.gcols { display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 600px) {
+  .skills { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .skills dd { margin-bottom: 12px; }
+}
+</style>
+
+<div class="win" id="termwin">
+  <div class="bar">
+    <span><b>neeraj</b> · terminal</span>
+    <button class="btn" type="button" id="toGui">gui view</button>
+  </div>
+  <div class="scroller" id="scroller">
+    <div id="log" role="log" aria-live="polite"></div>
+    <form class="row" id="row" autocomplete="off">
+      <label class="prompt" for="cmd"><span class="u">guest</span><span class="at">@</span><span class="host">neeraj</span><span class="dim">:~$</span></label>
+      <input id="cmd" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Terminal command">
+    </form>
+  </div>
+  <div class="chips" aria-label="Quick commands">
+    <button class="chip" type="button" data-cmd="help">help</button>
+    <button class="chip" type="button" data-cmd="about">about</button>
+    <button class="chip" type="button" data-cmd="projects">projects</button>
+    <button class="chip" type="button" data-cmd="skills">skills</button>
+    <button class="chip" type="button" data-cmd="education">education</button>
+    <button class="chip" type="button" data-cmd="resume">resume</button>
+    <button class="chip" type="button" data-cmd="contact">contact</button>
+    <button class="chip" type="button" data-cmd="clear">clear</button>
+  </div>
+</div>
+
+<div class="win" id="guiwin" hidden>
+  <div class="bar">
+    <span><b>neeraj</b> · website</span>
+    <button class="btn" type="button" id="toTerm">terminal view</button>
+  </div>
+  <div class="gui" id="gui"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Content (edit links here) -------------------------------------------
+  var GH = 'https://github.com/neerajmittal5252-create';
+  var D = {
+    name: 'Neeraj Kumar',
+    role: 'B.Tech Computer Science and Engineering',
+    school: 'Indian Institute of Information Technology, Una',
+    email: 'neerajmittal5252@gmail.com',
+    github: GH,
+    linkedin: 'https://www.linkedin.com/in/neeraj-mittal-39164a322',
+    resumeUrl: 'https://drive.google.com/file/d/1RWyBp8Sh_HXlfKm5VR6ToGykhnRKa8Lk/view',
+    summary: [
+      'B.Tech student building agentic AI systems and ML pipelines.',
+      'LangGraph and CrewAI workflows, RAG with FAISS, and FastAPI backends deployed to the cloud.',
+      'Open to AI/ML engineering internships.'
+    ],
+    projects: [
+      {
+        id: 1, key: 'resumeweaver', name: 'ResumeWeaver', date: 'Aug 2026',
+        sub: 'Automated Job Discovery & Resume Generation Pipeline',
+        stack: ['FastAPI', 'LangGraph', 'CrewAI', 'Activepieces', 'Google Sheets'],
+        pts: [
+          'Built an end-to-end AI pipeline that discovers and ranks job postings against a skill profile, lists matches in Google Sheets, and triggers tailored resume generation for roles above a 60% relevance threshold.',
+          'Engineered a FastAPI backend with asynchronous LangGraph orchestration and a 3-agent CrewAI review pipeline that checks ATS compatibility, technical accuracy and readability before generating the final PDF resume.',
+          'Integrated Activepieces, Google Sheets and Google Drive to automate job discovery, tracking and resume delivery, removing repetitive manual work.',
+          'Implemented a submit-poll-retrieve job-queue architecture so multi-step LLM workflows finish without HTTP timeouts.'
+        ],
+        link: GH
+      },
+      {
+        id: 2, key: 'pneumoscan', name: 'PneumoScan AI', date: 'Apr 2026',
+        sub: 'Chest X-Ray Classification & RAG',
+        stack: ['MobileNet', 'TensorFlow/Keras', 'FAISS', 'BAAI Embeddings'],
+        pts: [
+          'Developed a 2-stage medical diagnostic system that combines deep transfer learning with RAG to give context-grounded clinical explanations.',
+          'Raised precision to 99.23%, AUC to 0.9858 and accuracy to 90.17% by moving from custom CNNs to a fine-tuned MobileNet.',
+          'Indexed official NICE clinical guidelines into FAISS using 512-token chunking and 768-dimensional BAAI embeddings.'
+        ],
+        link: GH + '/Pneumonia-check-with-Suggestions'
+      },
+      {
+        id: 3, key: 'ipl', name: 'IPL Match Win Prediction', date: 'Nov 2025',
+        sub: 'ML Pipeline & Deployment',
+        stack: ['Scikit-learn', 'Pandas', 'Streamlit'],
+        pts: [
+          'Designed an end-to-end data pipeline over 72,413 delivery records from 756 IPL matches, with automated cleaning and feature engineering.',
+          'Built a Scikit-learn model on an 80/20 train-test split and reached 80.31% test accuracy for real-time win probability estimation.',
+          'Deployed an interactive Streamlit app with live win-probability visualizations, serving the model through Pickle serialization.'
+        ],
+        link: GH
+      }
+    ],
+    skills: [
+      ['Languages', 'Python, C++, C, SQL'],
+      ['Agentic AI & GenAI', 'LangGraph, LangChain, RAG, FAISS, CrewAI, MCP, OpenAI API, Gemini API, OpenRouter, Prompt Engineering, Streaming Inference, n8n/Activepieces'],
+      ['Deep Learning & CV', 'NLP, TensorFlow, Keras, MobileNet, EfficientNet B0, Transfer Learning, Scikit-learn, Feature Engineering, Model Evaluation'],
+      ['Backend & Web', 'FastAPI, Pydantic, SQLAlchemy, PostgreSQL, Supabase, Streamlit, Asynchronous Programming'],
+      ['Data & MLOps', 'Pandas, NumPy, Matplotlib, Seaborn, Git, GitHub, AWS Elastic Beanstalk, Google Colab']
+    ],
+    courses: 'Data Structures & Algorithms, Database Management Systems, Operating Systems, Computer Networks, Computer Organization, Theory of Computation, Compiler Design',
+    education: [
+      { deg: 'B.Tech (CSE)', where: 'Indian Institute of Information Technology, Una', score: 'CGPA 7.49 (current)', year: '2024 to present' },
+      { deg: 'Senior Secondary', where: 'RBSE', score: '85.6%', year: '2024' },
+      { deg: 'Secondary', where: 'RBSE', score: '89.83%', year: '2022' }
+    ],
+    achievements: [
+      ['Adobe University Hackathon', 'Advanced to Round 3 among the top 416 of 100,000 registered teams, across DSA, SQL, case-study and technical rounds.'],
+      ['Algorithmic mastery', 'Solved 200+ data structures and algorithms problems across coding platforms.'],
+      ['Cloud infrastructure', 'Deployed 3+ production-grade AI/ML apps on Streamlit Cloud and AWS Elastic Beanstalk.']
+    ]
+  };
+
+  // ---- Helpers --------------------------------------------------------------
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"]/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
+    });
+  };
+  var cmdLink = function (run, label) {
+    return '<span class="cmd" role="button" tabindex="0" data-cmd="' + esc(run) + '">' + esc(label || run) + '</span>';
+  };
+  var ext = function (url, label) {
+    return '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label || url) + '</a>';
+  };
+  var copyBtn = function (text) {
+    return '<span class="cmd" role="button" tabindex="0" data-copy="' + esc(text) + '">[copy]</span>';
+  };
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  var scroller = $('#scroller');
+  var log = $('#log');
+  var input = $('#cmd');
+
+  function print(html, cls) {
+    var d = document.createElement('div');
+    d.className = 'line' + (cls ? ' ' + cls : '');
+    d.innerHTML = html;
+    log.appendChild(d);
+    return d;
+  }
+  function gap() { print('', 'gap'); }
+  function heading(t) { print('<span class="amber">## ' + esc(t) + '</span>'); }
+  function echo(text) {
+    return print('<span class="u">guest</span><span class="at">@</span><span class="host">neeraj</span><span class="dim">:~$</span> ' + esc(text));
+  }
+
+  // ---- Banner ---------------------------------------------------------------
+  var GLYPH = {
+    N: ['█   █', '██  █', '█ █ █', '█  ██', '█   █'],
+    E: ['█████', '█    ', '████ ', '█    ', '█████'],
+    R: ['████ ', '█   █', '████ ', '█  █ ', '█   █'],
+    A: [' ███ ', '█   █', '█████', '█   █', '█   █'],
+    J: ['  ███', '    █', '    █', '█   █', ' ███ ']
+  };
+  function bannerArt() {
+    var word = 'NEERAJ'.split('');
+    var rows = [0, 1, 2, 3, 4].map(function (r) {
+      return word.map(function (ch) { return GLYPH[ch][r]; }).join(' ');
+    });
+    var shadow = word.map(function (ch) { return GLYPH[ch][4].replace(/█/g, '░'); }).join(' ');
+    return rows.join('\n') + '\n<span class="sh">' + shadow + '</span>';
+  }
+
+  // ---- Printers -------------------------------------------------------------
+  function pSummary() {
+    D.summary.forEach(function (l) { print(esc(l)); });
+  }
+  function pProjectList() {
+    D.projects.forEach(function (p) {
+      print(cmdLink('project ' + p.id, '[' + p.id + ']') + ' <b class="g">' + esc(p.name) + '</b> <span class="dim">' + esc(p.date) + '</span>');
+      print(esc(p.sub), 'ind');
+      print(esc(p.stack.join(' · ')), 'ind dim');
+      gap();
+    });
+    print('Type ' + cmdLink('project 1') + ' (or 2, 3) to read the details.');
+  }
+  function pProject(p) {
+    print('<b class="g">' + esc(p.name) + '</b> <span class="dim">' + esc(p.date) + '</span>');
+    print(esc(p.sub));
+    print('<span class="dim">stack: ' + esc(p.stack.join(' · ')) + '</span>');
+    gap();
+    p.pts.forEach(function (t) { print('– ' + esc(t), 'b'); });
+    gap();
+    print('code: ' + ext(p.link));
+  }
+  function pSkills() {
+    D.skills.forEach(function (s) {
+      print('<span class="amber">' + esc(s[0]) + '</span>');
+      print(esc(s[1]), 'ind');
+      gap();
+    });
+    print('<span class="amber">Key courses</span>');
+    print(esc(D.courses), 'ind');
+  }
+  function pEducation() {
+    D.education.forEach(function (e, i) {
+      print('<b class="g">' + esc(e.deg) + '</b> <span class="dim">' + esc(e.year) + '</span>');
+      print(esc(e.where + ' · ' + e.score), 'ind');
+      if (i < D.education.length - 1) gap();
+    });
+  }
+  function pAchievements() {
+    D.achievements.forEach(function (a, i) {
+      print('<b class="g">' + esc(a[0]) + '</b>');
+      print(esc(a[1]), 'ind');
+      if (i < D.achievements.length - 1) gap();
+    });
+  }
+  function pContact() {
+    print('<span class="dim">email</span>    <span class="addr">' + esc(D.email) + '</span> ' + copyBtn(D.email));
+    print('<span class="dim">github</span>   ' + ext(D.github));
+    print('<span class="dim">linkedin</span> ' + ext(D.linkedin));
+  }
+  function pIntro() {
+    print('<pre class="art" aria-label="NEERAJ">' + bannerArt() + '</pre>', 'art-wrap');
+    gap();
+    print('<b>#' + esc(D.name) + '</b>');
+    gap();
+    pSummary();
+    gap();
+    print('Want a regular website? type ' + cmdLink('gui') + ' and press enter');
+    gap();
+    print('Example commands:');
+    [['resume', 'r', 'resume'], ['projects', 'p', 'projects'], ['skills', 's', 'skills'], ['education', 'e', 'education'], ['email', '', 'email'], ['github', '', 'github']]
+      .forEach(function (x) {
+        var lbl = x[1] ? cmdLink(x[0]) + ' or ' + cmdLink(x[1]) : cmdLink(x[0]);
+        print('– ' + lbl, 'ind');
+      });
+    gap();
+    print('Type ' + cmdLink('help') + ' to see every command.');
+  }
+
+  // ---- Commands -------------------------------------------------------------
+  var HELP = [
+    ['about', 'about', 'who I am'],
+    ['projects', 'projects', 'what I have built'],
+    ['project 1', 'project <n>', 'details of one project'],
+    ['skills', 'skills', 'tools and technologies'],
+    ['education', 'education', 'degree and school results'],
+    ['achievements', 'achievements', 'hackathon and more'],
+    ['resume', 'resume', 'open my resume (PDF)'],
+    ['cv', 'cv', 'the whole CV printed here'],
+    ['github', 'github', 'my GitHub profile'],
+    ['linkedin', 'linkedin', 'my LinkedIn profile'],
+    ['email', 'email', 'my address, with copy'],
+    ['contact', 'contact', 'every way to reach me'],
+    ['gui', 'gui', 'switch to the regular website'],
+    ['clear', 'clear', 'clear the screen']
+  ];
+  var C = {
+    help: function () {
+      print('Available commands:');
+      HELP.forEach(function (h) {
+        print('<span>' + cmdLink(h[0], h[1]) + '</span><span class="dim">' + esc(h[2]) + '</span>', 'grid2');
+      });
+      gap();
+      print('<span class="dim">Short forms: a, p, s, e, r. Use ↑ and ↓ for history, Tab to complete.</span>');
+    },
+    banner: function () { pIntro(); },
+    about: function () {
+      print('<b class="g">' + esc(D.name) + '</b>');
+      print(esc(D.role + ', ' + D.school + ' (2024 to present).'));
+      gap();
+      pSummary();
+    },
+    projects: function () { pProjectList(); },
+    project: function (args) {
+      var q = (args[0] || '').toLowerCase();
+      var p = D.projects.filter(function (x) {
+        return String(x.id) === q || x.key.indexOf(q) === 0 || (q && x.name.toLowerCase().indexOf(q) === 0);
+      })[0];
+      if (!p) {
+        print('<span class="err">usage:</span> project &lt;n&gt;, for example ' + cmdLink('project 1') + '. See ' + cmdLink('projects') + ' for the list.');
+        return;
+      }
+      pProject(p);
+    },
+    skills: function () { pSkills(); },
+    education: function () { pEducation(); },
+    achievements: function () { pAchievements(); },
+    resume: function () {
+      print('Opening CV ...');
+      try { window.open(D.resumeUrl, '_blank', 'noopener'); } catch (err) { /* link below is the fallback */ }
+      print('<span class="dim">Nothing opened?</span> ' + ext(D.resumeUrl, 'Open resume (Google Drive)'));
+    },
+    cv: function () {
+      print('<b class="g">' + esc(D.name) + '</b>');
+      print('<span class="dim">' + esc(D.role + ', ' + D.school) + '</span>');
+      gap();
+      heading('Education'); pEducation(); gap();
+      heading('Projects');
+      D.projects.forEach(function (p) { pProject(p); gap(); });
+      heading('Technical skills'); pSkills(); gap();
+      heading('Achievements'); pAchievements(); gap();
+      heading('Contact'); pContact();
+    },
+    github: function () { print(ext(D.github)); },
+    linkedin: function () { print(ext(D.linkedin)); },
+    email: function () {
+      print('<span class="addr">' + esc(D.email) + '</span> ' + copyBtn(D.email));
+    },
+    contact: function () { pContact(); },
+    gui: function () {
+      print('Switching to the regular website. Use the button at the top right to come back.');
+      setMode('gui');
+    },
+    clear: function () { log.innerHTML = ''; },
+    whoami: function () { print('guest. You are browsing the portfolio of ' + esc(D.name) + '.'); },
+    ls: function () {
+      print(['about', 'projects', 'skills', 'education', 'achievements', 'resume', 'contact'].map(function (n) { return cmdLink(n); }).join('  '));
+    },
+    sudo: function (args) {
+      if (args.join(' ').toLowerCase().indexOf('hire') !== -1) {
+        print('<span class="g">Permission granted.</span> Drafting the offer letter. The fastest way to send it: ' + cmdLink('email') + '.');
+      } else {
+        print('<span class="err">guest is not in the sudoers file.</span> This incident will be reported.');
+      }
+    }
+  };
+  var ALIAS = { a: 'about', p: 'projects', s: 'skills', e: 'education', r: 'resume', cls: 'clear', '?': 'help', man: 'help', mail: 'email', gh: 'github', li: 'linkedin' };
+
+  var hist = [];
+  var hi = 0;
+
+  function run(raw, record) {
+    var line = String(raw).trim();
+    var e = echo(line);
+    if (line) {
+      if (record !== false) { hist.push(line); hi = hist.length; }
+      var parts = line.split(/\s+/);
+      var name = parts[0].toLowerCase();
+      var fn = C[ALIAS[name] || name];
+      if (typeof fn === 'function' && Object.prototype.hasOwnProperty.call(C, ALIAS[name] || name)) {
+        fn(parts.slice(1));
+      } else {
+        print('<span class="err">command not found:</span> ' + esc(parts[0]) + '. Type ' + cmdLink('help') + ' to list commands.');
+      }
+    }
+    if (log.contains(e)) {
+      var below = scroller.scrollHeight - e.offsetTop;
+      scroller.scrollTop = below > scroller.clientHeight ? e.offsetTop - 8 : scroller.scrollHeight;
+    } else {
+      scroller.scrollTop = 0;
+    }
+  }
+
+  // ---- Modes ----------------------------------------------------------------
+  function setMode(m) {
+    $('#termwin').hidden = m === 'gui';
+    $('#guiwin').hidden = m !== 'gui';
+    if (m === 'gui') { $('#gui').scrollTop = 0; }
+    else if (fine) { input.focus(); }
+  }
+
+  // ---- GUI view -------------------------------------------------------------
+  function buildGui() {
+    var h = '';
+    h += '<div class="gwrap">';
+    h += '<header class="ghead"><h1>' + esc(D.name) + '</h1>';
+    h += '<p class="role">' + esc(D.role + ' · ' + D.school) + '</p>';
+    h += '<p class="lead">' + esc(D.summary.join(' ')) + '</p>';
+    h += '<div class="glinks"><span><span class="addr">' + esc(D.email) + '</span> ' + copyBtn(D.email) + '</span>' +
+      ext(D.github, 'GitHub') + ext(D.linkedin, 'LinkedIn') + ext(D.resumeUrl, 'Resume') + '</div></header>';
+
+    h += '<section><h2>Projects</h2>';
+    D.projects.forEach(function (p) {
+      h += '<article class="proj"><div class="top"><h3>' + esc(p.name) + '</h3><span class="date">' + esc(p.date) + '</span></div>';
+      h += '<p class="sub">' + esc(p.sub) + '</p>';
+      h += '<div class="tags">' + p.stack.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>';
+      h += '<ul>' + p.pts.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+      h += '<div>' + ext(p.link, 'View code') + '</div></article>';
+    });
+    h += '</section>';
+
+    h += '<section><h2>Technical skills</h2><dl class="skills">';
+    D.skills.forEach(function (s) { h += '<dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd>'; });
+    h += '<dt>Key courses</dt><dd>' + esc(D.courses) + '</dd></dl></section>';
+
+    h += '<section><h2>Education</h2>';
+    D.education.forEach(function (e) {
+      h += '<div class="edu"><div class="top"><b>' + esc(e.deg) + '</b><span class="date" style="font:12px var(--mono);color:var(--dim)">' + esc(e.year) + '</span></div>';
+      h += '<span>' + esc(e.where) + ' · ' + esc(e.score) + '</span></div>';
+    });
+    h += '</section>';
+
+    h += '<section><h2>Achievements</h2><ul class="plain">';
+    D.achievements.forEach(function (a) { h += '<li><b>' + esc(a[0]) + '.</b> ' + esc(a[1]) + '</li>'; });
+    h += '</ul></section>';
+
+    h += '</div>';
+    $('#gui').innerHTML = h;
+  }
+
+  // ---- Copy -----------------------------------------------------------------
+  function doCopy(el) {
+    var text = el.getAttribute('data-copy');
+    var original = '[copy]';
+    function done(msg) {
+      el.textContent = msg;
+      setTimeout(function () { el.textContent = original; }, 1600);
+    }
+    function fallback() {
+      var scope = el.parentElement;
+      var addr = scope && scope.querySelector('.addr');
+      if (addr && window.getSelection) {
+        var r = document.createRange();
+        r.selectNodeContents(addr);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+      done('[selected]');
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { done('[copied]'); }, fallback);
+    } catch (err) {
+      fallback();
+    }
+  }
+
+  // ---- Events ---------------------------------------------------------------
+  function activate(el) {
+    if (el.hasAttribute('data-copy')) { doCopy(el); return; }
+    var c = el.getAttribute('data-cmd');
+    if (c) { run(c); if (fine) input.focus(); }
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-cmd],[data-copy]');
+    if (el) activate(el);
+  });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('span[data-cmd],span[data-copy]')) {
+      e.preventDefault();
+      activate(e.target);
+    }
+  });
+  scroller.addEventListener('click', function (e) {
+    if (e.target.closest('a,.cmd,button,input')) return;
+    if (String(window.getSelection())) return;
+    if (fine) input.focus();
+  });
+  $('#toGui').addEventListener('click', function () { setMode('gui'); });
+  $('#toTerm').addEventListener('click', function () { setMode('term'); });
+
+  $('#row').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = input.value;
+    input.value = '';
+    run(v);
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (hi > 0) { hi--; input.value = hist[hi]; }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (hi < hist.length - 1) { hi++; input.value = hist[hi]; }
+      else { hi = hist.length; input.value = ''; }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      var v = input.value.trim().toLowerCase();
+      if (!v) return;
+      var names = Object.keys(C).concat(Object.keys(ALIAS).filter(function (k) { return k.length > 2; }));
+      var hits = names.filter(function (n) { return n.indexOf(v) === 0; });
+      if (hits.length === 1) { input.value = hits[0] + ' '; }
+      else if (hits.length > 1) { echo(input.value); print(hits.map(function (n) { return cmdLink(n); }).join('  ')); }
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+      e.preventDefault();
+      C.clear();
+    }
+  });
+
+  // ---- Start ----------------------------------------------------------------
+  buildGui();
+  run('banner', false);
+  scroller.scrollTop = 0;
+  if (fine) input.focus({ preventScroll: true });
+})();
+</script>
+
+</body></html>
