@@ -1,19 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Neeraj Kumar</title>
-<meta name="description" content="Neeraj Kumar, B.Tech CSE student at IIIT Una building agentic AI systems and ML pipelines. Projects, skills and contact.">
-<meta name="theme-color" content="#0d100c">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Neeraj Kumar">
-<meta property="og:description" content="Neeraj Kumar, B.Tech CSE student at IIIT Una building agentic AI systems and ML pipelines. Projects, skills and contact.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d100c'/%3E%3Cpath d='M7 10l7 6-7 6' fill='none' stroke='%236fd08c' stroke-width='3'/%3E%3Cpath d='M17 23h9' stroke='%236fd08c' stroke-width='3'/%3E%3C/svg%3E">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-</head>
-<body>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -611,8 +597,10 @@ button.sk:hover { border-color: var(--cyan); }
   'use strict';
 
   // ---- Content (edit links here) -------------------------------------------
-  // Contact form: paste your free Web3Forms access key between the quotes to let visitors send messages to your inbox.
-  var CONTACT = { key: '7260a549-fd70-4792-b362-799830c5a0ad' };
+  // Contact form: the deploy build step replaces the placeholder below with the WEB3FORMS_KEY environment variable.
+  // If it is not replaced, the key stays empty and the form falls back to copying a draft.
+  var CONTACT = { key: '__WEB3FORMS_KEY__' };
+  if (/^__/.test(CONTACT.key)) { CONTACT.key = ''; }
   var GH = 'https://github.com/neerajmittal5252-create';
   var D = {
     name: 'Neeraj Kumar',
@@ -625,7 +613,7 @@ button.sk:hover { border-color: var(--cyan); }
     leetcode: 'https://leetcode.com/u/Neeraj_Mittal_27/',
     summary: [
       'B.Tech student building agentic AI systems and ML pipelines.',
-      'LangGraph and CrewAI workflows, RAG with FAISS, and FastAPI backends deployed to the cloud.',
+      'Building intelligent systems with LLMs, multi-agent architectures, RAG, and scalable Python backends.',
       'Open to AI/ML engineering internships.'
     ],
     projects: [
@@ -974,12 +962,9 @@ button.sk:hover { border-color: var(--cyan); }
   var PATH = [
     { when: '2022', title: 'Secondary, RBSE', body: 'Scored 89.83%.' },
     { when: '2024', title: 'Senior Secondary, RBSE', body: 'Scored 85.6%.' },
-    { when: '2024 to now', title: 'B.Tech CSE, IIIT Una', body: 'CGPA 7.49 (current). Key courses:', courses: true },
-    { when: 'Nov 2025', proj: 3 },
-    { when: 'Apr 2026', proj: 2 },
-    { when: 'Aug 2026', proj: 1 }
+    { when: '2024 to now', title: 'B.Tech CSE, IIIT Una', body: 'CGPA 7.49 (current). Key courses:', courses: true }
   ];
-  var st = { flt: '', tile: 0, tl: 2, open: { 1: true }, node: { 1: 0, 2: 0, 3: 0 } };
+  var st = { flt: '', tile: 0, tl: 2, open: {}, node: { 1: 0, 2: 0, 3: 0 } };
   var g = null;
 
   function toks(s) { return String(s).toLowerCase().split('/'); }
@@ -1115,7 +1100,7 @@ button.sk:hover { border-color: var(--cyan); }
     h += '<main class="gmain">';
 
     h += '<section class="gsec" id="g-about"><div class="hero"><p class="eyebrow"><span class="sr">AI/ML engineering student</span><span id="typed" aria-hidden="true">AI/ML engineering student</span><span class="caret" aria-hidden="true">_</span></p>' +
-      '<h2 class="big">Agentic AI systems and ML pipelines, <em>built end to end.</em></h2>' +
+      '<h2 class="big">Designing and deploying intelligent <em>AI applications.</em></h2>' +
       '<p class="lead">' + esc(D.summary[1]) + '</p>' +
       '<div class="tiles" role="group" aria-label="Achievements">' + TILES.map(function (t, i) {
         return '<button class="tile" type="button" data-tile="' + i + '" aria-pressed="false"><b>' + esc(t[0]) + '<em class="cu" data-to="' + t[1] + '">' + t[1] + '</em>' + esc(t[2]) + '</b><span>' + esc(t[3]) + '</span></button>';
@@ -1127,7 +1112,7 @@ button.sk:hover { border-color: var(--cyan); }
       D.projects.map(cardHtml).join('') + '</section>';
 
     h += '<section class="gsec" id="g-skills"><h2>Skills</h2>' +
-      '<p class="hint">A number means a project uses that skill. Click one to filter the projects above.</p>' +
+      '<p class="hint">Click a skill to see the projects that use it.</p>' +
       '<input class="skq" id="skq" type="search" placeholder="Search skills, e.g. rag or fastapi" aria-label="Search skills" autocomplete="off">' +
       '<p class="fcount" id="skcount" aria-live="polite"></p><div class="sgs">';
     D.skills.forEach(function (grp) {
@@ -1135,7 +1120,7 @@ button.sk:hover { border-color: var(--cyan); }
       grp[1].split(', ').forEach(function (sk) {
         var n = countFor(sk);
         h += n
-          ? '<button class="sk" type="button" data-skill="' + esc(sk) + '" title="Used in ' + esc(D.projects.filter(function (p) { return matches(p, sk); }).map(function (p) { return p.name; }).join(', ')) + '">' + esc(sk) + '<i>' + n + '</i></button>'
+          ? '<button class="sk" type="button" data-skill="' + esc(sk) + '" title="Used in ' + esc(D.projects.filter(function (p) { return matches(p, sk); }).map(function (p) { return p.name; }).join(', ')) + '">' + esc(sk) + '</button>'
           : '<span class="sk off">' + esc(sk) + '</span>';
       });
       h += '</div></div>';
@@ -1215,8 +1200,8 @@ button.sk:hover { border-color: var(--cyan); }
 
   // ---- GUI extras: jump palette, accent colour, skill search, message draft, motion ----
   var timers = {};
-  var ACC = [['green', '#6fd08c', '#2f9e57'], ['amber', '#e8b95a', '#a98532'], ['cyan', '#79c3d3', '#3d8797'], ['coral', '#e58a74', '#a8523f']];
-  var PHR = ['AI/ML engineering student', 'Agentic AI builder', 'RAG and FastAPI backends', 'Open to internships'];
+  var ACC = [['cyan', '#79c3d3', '#79c3d3'], ['green', '#6fd08c', '#2f9e57'], ['amber', '#e8b95a', '#a98532'], ['coral', '#e58a74', '#a8523f']];
+  var PHR = ['Machine Learning Pipiline Builder', 'Agentic AI builder', 'RAG and FastAPI backends', 'Open to internships'];
   var palReturn = null;
   var palIdx = 0;
   var palList = [];
@@ -1433,8 +1418,8 @@ button.sk:hover { border-color: var(--cyan); }
       }
     });
 
-    var saved = 'green';
-    try { saved = localStorage.getItem('nk-accent') || 'green'; } catch (err) { /* storage unavailable */ }
+    var saved = 'cyan';
+    try { saved = localStorage.getItem('nk-accent') || 'cyan'; } catch (err) { /* storage unavailable */ }
     setAccent(saved, false);
 
     g.querySelector('#skq').addEventListener('input', function (e) {
@@ -1621,5 +1606,4 @@ button.sk:hover { border-color: var(--cyan); }
 })();
 </script>
 
-</body>
-</html>
+</body></html>
